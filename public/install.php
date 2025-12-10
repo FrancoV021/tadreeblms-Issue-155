@@ -123,12 +123,92 @@ try {
     switch ($current) {
 
         case 'check':
-            try {
-                out("Checking PHP version...");
-                out("PHP Version: " . phpversion());
-            } catch (Exception $e) {
-                fail("PHP error: " . $e->getMessage());
+
+            out("<strong>System Requirements Check</strong><br><br>");
+
+            $allGood = true; // Track errors
+
+            // PHP VERSION
+            $minPhp = "8.0";
+            $currentPhp = phpversion();
+            if (version_compare($currentPhp, $minPhp, '>=')) {
+                out("✔ PHP Version OK ($currentPhp) <br>");
+            } else {
+                out("❌ PHP $minPhp or higher required — current: $currentPhp <br>");
+                $allGood = false;
             }
+
+            // REQUIRED EXTENSIONS
+            $requiredExtensions = [
+                'pdo',
+                'pdo_mysql',
+                'openssl',
+                'mbstring',
+                'tokenizer',
+                'xml',
+                'ctype',
+                'json',
+                'bcmath',
+                'fileinfo',
+                'curl'
+            ];
+
+            out("<br><strong>PHP Extensions:</strong><br>");
+
+            foreach ($requiredExtensions as $ext) {
+                if (extension_loaded($ext)) {
+                    out("✔ $ext enabled<br>");
+                } else {
+                    out("❌ Missing extension: $ext<br>");
+                    $allGood = false;
+                }
+            }
+
+            // FOLDER PERMISSIONS
+            $pathsToCheck = [
+                __DIR__ . '/../storage' => 'storage/',
+                __DIR__ . '/../bootstrap/cache' => 'bootstrap/cache/'
+            ];
+
+            out("<br><strong>Folder Permissions:</strong><br>");
+
+            foreach ($pathsToCheck as $path => $label) {
+                if (is_writable($path)) {
+                    out("✔ $label is writable<br>");
+                } else {
+                    out("❌ $label is NOT writable<br>");
+                    $allGood = false;
+                }
+            }
+
+            // SERVER OS TYPE
+            $os = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'Windows / XAMPP' : 'Linux / Ubuntu';
+            out("<br><strong>Server:</strong> $os<br>");
+
+            // COMPOSER CHECK
+            $composerPath = __DIR__ . '/composer.phar';
+            out("<br><strong>Composer:</strong><br>");
+
+            if (file_exists($composerPath)) {
+                out("✔ composer.phar found in public/<br>");
+            } else {
+                out("⚠ composer.phar NOT found — you must upload it or install globally<br>");
+                // Composer missing doesn't block — optional
+            }
+
+            // FINAL RESULT
+            out("<br><strong>Result:</strong><br>");
+
+            if ($allGood) {
+                out("✔ All requirements satisfied.<br>");
+                echo "<br><a class='button' href='?step=" . nextStep($current) . "'>Continue</a>";
+            } else {
+                out("<br>❌ Some requirements failed.<br>Please fix above issues and refresh this page.<br>");
+            }
+
+            echo "</div></div></body></html>";
+            exit;
+
             break;
 
         case 'composer':
@@ -178,7 +258,7 @@ try {
                 out("<div style='color: red; font-weight: bold;'>❌ Error: " . $e->getMessage() . "</div>");
                 exit;
             }
-            
+
 
             break;
 
