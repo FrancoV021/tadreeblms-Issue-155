@@ -194,7 +194,7 @@ try {
             // 4️⃣ Git safe.directory check
             // --------------------
             $projectPath = realpath(__DIR__ . '/..');
-            if(0) {//if ($outSystemOS == 'Windows') {
+            if (0) { //if ($outSystemOS == 'Windows') {
                 $gitSafe = shell_exec("git config --global --get-all safe.directory | findstr \"$projectPath\"");
                 if (!$gitSafe) {
                     out("⚠ Git safe.directory not set — run: <code>git config --global --add safe.directory $projectPath</code><br>");
@@ -339,10 +339,11 @@ try {
 
                 // Set environment variables for Composer
                 if ($isWindows) {
-                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist 2>&1";
+                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist --no-security-audit 2>&1";
                 } else {
-                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist 2>&1";
+                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist --no-security-audit 2>&1";
                 }
+
 
                 out("Executing:<br><pre>$cmd</pre>");
 
