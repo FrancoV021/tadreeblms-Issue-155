@@ -120,10 +120,10 @@ try {
 
         case 'check':
 
-
             out("<strong>System Requirements Check</strong><br><br>");
             $allGood = true;
             $outSystemOS = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'Windows' : 'Linux';
+
             // --------------------
             // 1️⃣ PHP Version
             // --------------------
@@ -168,10 +168,23 @@ try {
             // --------------------
             // 3️⃣ Composer check
             // --------------------
-            $composerGlobal = trim(shell_exec('which composer') ?: shell_exec('where composer'));
+            $composerCmd = null;
+            if ($outSystemOS === 'Windows') {
+                $paths = ['composer', 'C:\\ProgramData\\ComposerSetup\\bin\\composer.bat', 'C:\\composer\\composer.bat'];
+            } else {
+                $paths = ['/usr/local/bin/composer', '/usr/bin/composer', 'composer'];
+            }
+            foreach ($paths as $path) {
+                $test = @shell_exec("$path --version 2>&1");
+                if ($test && stripos($test, 'Composer') !== false) {
+                    $composerCmd = $path;
+                    break;
+                }
+            }
+
             out("<br><strong>Composer:</strong><br>");
-            if ($composerGlobal) {
-                out("✔ Composer found: $composerGlobal<br>");
+            if ($composerCmd) {
+                out("✔ Composer found: $composerCmd<br>");
             } else {
                 out("❌ Composer not found — install globally or upload composer.phar<br>");
                 $allGood = false;
@@ -182,8 +195,7 @@ try {
             // --------------------
             $projectPath = realpath(__DIR__ . '/..');
             if ($outSystemOS == 'Windows') {
-
-                $gitSafe = shell_exec("git config --global --get-all safe.directory | grep '$projectPath'");
+                $gitSafe = shell_exec("git config --global --get-all safe.directory | findstr \"$projectPath\"");
                 if (!$gitSafe) {
                     out("⚠ Git safe.directory not set — run: <code>git config --global --add safe.directory $projectPath</code><br>");
                 } else {
@@ -192,7 +204,7 @@ try {
             }
 
             // --------------------
-            // Required folders & files
+            // 5️⃣ Required folders & files
             // --------------------
             $pathsToCheck = [
                 __DIR__ . '/../storage' => 'storage/',
@@ -200,8 +212,6 @@ try {
                 __DIR__ . '/../.env' => '.env file',
                 __DIR__ . '/../vendor' => 'vendor folder'
             ];
-
-            
 
             out("<br><strong>Folders & Files Check:</strong><br>");
             foreach ($pathsToCheck as $path => $label) {
@@ -251,7 +261,7 @@ try {
             }
 
             // --------------------
-            // 6️⃣ Composer Extensions Required
+            // 6️⃣ Composer-required extensions
             // --------------------
             $composerReqs = ['ext-gd', 'ext-curl'];
             foreach ($composerReqs as $ext) {
@@ -265,7 +275,7 @@ try {
             // --------------------
             // 7️⃣ Server OS
             // --------------------
-            $os = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'Windows / XAMPP' : 'Linux / Ubuntu';
+            $os = $outSystemOS === 'Windows' ? 'Windows / XAMPP' : 'Linux / Ubuntu';
             out("<br><strong>Server:</strong> $os<br>");
 
             // --------------------
@@ -281,87 +291,6 @@ try {
 
             echo "</div></div></body></html>";
             exit;
-
-
-        case 'composer':
-
-            try {
-                out("Running Composer install...");
-                ini_set('max_execution_time', 3000);
-                ini_set('memory_limit', '1G');
-                set_time_limit(0);
-
-                $projectPath = realpath(__DIR__ . '/..');
-                $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-
-                // Detect Composer path
-                if ($isWindows) {
-                    $composerPaths = [
-                        'composer',
-                        'C:\\ProgramData\\ComposerSetup\\bin\\composer.bat',
-                        'C:\\ProgramData\\ComposerSetup\\composer.phar',
-                        'C:\\Program Files\\Composer\\composer.bat',
-                        'C:\\composer\\composer.bat',
-                    ];
-                } else {
-                    $composerPaths = [
-                        '/usr/local/bin/composer',
-                        '/usr/bin/composer',
-                        'composer',
-                    ];
-                }
-
-                $composerCmd = null;
-                foreach ($composerPaths as $path) {
-                    if (stripos($path, 'composer') !== false) {
-                        $test = shell_exec("$path --version 2>&1");
-                        if ($test && stripos($test, 'Composer') !== false) {
-                            $composerCmd = $path;
-                            break;
-                        }
-                    }
-                }
-
-                if (!$composerCmd) {
-                    fail("Composer not found. Install globally and ensure it is in PATH.");
-                }
-
-                out("Using Composer: <b>$composerCmd</b><br>");
-
-                // Set environment variables for Composer
-                if ($isWindows) {
-                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist 2>&1";
-                } else {
-                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd install --no-interaction --prefer-dist 2>&1";
-                }
-
-                out("Executing:<br><pre>$cmd</pre>");
-
-                $output = shell_exec($cmd);
-
-                if ($output === null) {
-                    fail("shell_exec returned NULL — composer cannot run (disabled or permission).");
-                }
-
-                out("<pre>$output</pre>");
-
-                // Check success
-                if (
-                    strpos($output, "Generating optimized autoload files") !== false ||
-                    strpos($output, "Nothing to install") !== false ||
-                    strpos($output, "Package operations") !== false
-                ) {
-                    out("✔ Composer install completed successfully.");
-                } else {
-                    fail("Composer failed. Output:<br><pre>$output</pre>");
-                }
-            } catch (Exception $e) {
-                fail("Composer error: " . $e->getMessage());
-            }
-
-            break;
-
-
 
         case 'db_config':
 
