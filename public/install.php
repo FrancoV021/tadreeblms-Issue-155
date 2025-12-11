@@ -347,9 +347,9 @@ try {
                 // --- Determine command: install vs update ---
                 $lockFile = $projectPath . '/composer.lock';
                 if ($isWindows) {
-                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs --no-audit 2>&1";
+                    $cmd = "set COMPOSER_HOME=%TEMP% && cd /d \"$projectPath\" && $composerCmd install 2>&1";
                 } else {
-                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd update --no-interaction --prefer-dist --ignore-platform-reqs --no-audit 2>&1";
+                    $cmd = "export COMPOSER_HOME=/tmp && export HOME=/tmp && cd \"$projectPath\" && $composerCmd install 2>&1";
                 }
 
                 out("Executing:<br><pre>$cmd</pre>");
