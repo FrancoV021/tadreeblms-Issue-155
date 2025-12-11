@@ -11,7 +11,8 @@ $envExample = $base . "/.env.example";
 // -----------------------------
 // Helper Response
 // -----------------------------
-function send($arr){
+function send($arr)
+{
     echo json_encode($arr);
     exit;
 }
@@ -19,26 +20,30 @@ function send($arr){
 // -----------------------------
 // Helper: Run shell commands
 // -----------------------------
-function run_cmd($cmd){
+function run_cmd($cmd)
+{
     $output = shell_exec($cmd . " 2>&1");
-    if(!$output) $output = "(no output)";
+    if (!$output) $output = "(no output)";
     return htmlspecialchars($output);
 }
 
 // -----------------------------
 // Detect Composer
 // -----------------------------
-function find_composer(){
+function find_composer()
+{
     $paths = [
         "composer",
         "/usr/local/bin/composer",
         "/usr/bin/composer",
-        "php composer.phar"
+        "php composer.phar",
+        "composer.bat",
+        "C:\\ProgramData\\ComposerSetup\\bin\\composer.bat"
     ];
 
-    foreach($paths as $p){
-        $v = shell_exec("$p --version 2>&1");
-        if($v && str_contains($v, "Composer")) return $p;
+    foreach ($paths as $p) {
+        $v = @shell_exec("$p --version 2>&1");
+        if ($v && stripos($v, "Composer") !== false) return $p;
     }
     return null;
 }
@@ -48,11 +53,10 @@ function find_composer(){
 // -----------------------------
 $step = $_POST["step"] ?? "check";
 
-
 // -------------------------------------------------------------
 // STEP: SAVE DATABASE DETAILS
 // -------------------------------------------------------------
-if($step === "db_save"){
+if ($step === "db_save") {
     $data = [
         "host" => $_POST["db_host"] ?? "127.0.0.1",
         "name" => $_POST["db_name"] ?? "",
@@ -71,208 +75,196 @@ if($step === "db_save"){
     ]);
 }
 
-
-
 // ===========================================================================
 // MAIN INSTALLER STEPS
 // ===========================================================================
-switch($step){
+switch ($step) {
 
-// -------------------------------------------------------------
-// 1) CHECK SYSTEM
-// -------------------------------------------------------------
-case "check":
+    // -------------------------------------------------------------
+    // 1) CHECK SYSTEM
+    // -------------------------------------------------------------
+    case "check":
 
-    $out = "";
+        $out = "";
 
-    $out .= "✔ PHP version: " . phpversion() . "<br>";
+        $out .= "✔ PHP version: " . phpversion() . "<br>";
 
-    $required = ["pdo_mysql","openssl","mbstring","tokenizer","xml","ctype","json","bcmath","fileinfo","curl","zip"];
-    foreach($required as $e){
-        $out .= extension_loaded($e)
-            ? "✔ $e<br>"
-            : "❌ Missing: $e<br>";
-    }
+        $required = ["pdo_mysql", "openssl", "mbstring", "tokenizer", "xml", "ctype", "json", "bcmath", "fileinfo", "curl", "zip"];
+        foreach ($required as $e) {
+            $out .= extension_loaded($e)
+                ? "✔ $e<br>"
+                : "❌ Missing: $e<br>";
+        }
 
-    $composer = find_composer();
-    if($composer){
-        $out .= "✔ Composer found: $composer<br>";
-    } else {
-        $out .= "❌ Composer not found<br>";
-    }
+        $composer = find_composer();
+        if ($composer) {
+            $out .= "✔ Composer found: $composer<br>";
+        } else {
+            $out .= "❌ Composer not found<br>";
+        }
 
-    send([
-        "success" => true,
-        "output"  => $out,
-        "percent" => 10,
-        "next"    => "composer",
-        "show_db_form" => false
-    ]);
-    break;   // <---- FIXED
-
-
-
-// -------------------------------------------------------------
-// 2) COMPOSER INSTALL
-// -------------------------------------------------------------
-case "composer":
-
-    $composer = find_composer();
-    if(!$composer){
         send([
-            "success" => false,
-            "output"  => "❌ Composer not found",
+            "success" => true,
+            "output"  => $out,
             "percent" => 10,
-            "next"    => "composer"
+            "next"    => "composer",
+            "show_db_form" => false
         ]);
-    }
+        break;
 
-    $cmd = "cd $base && $composer install --no-interaction --prefer-dist";
-    $out = run_cmd($cmd);
+    // -------------------------------------------------------------
+    // 2) COMPOSER INSTALL
+    // -------------------------------------------------------------
+    case "composer":
 
-    send([
-        "success" => true,
-        "output"  => nl2br($out),
-        "percent" => 40,
-        "next"    => "db_config",
-        "show_db_form" => true
-    ]);
-    break;   // <---- FIXED
+        $composer = find_composer();
+        if (!$composer) {
+            send([
+                "success" => false,
+                "output"  => "❌ Composer not found",
+                "percent" => 10,
+                "next"    => "composer"
+            ]);
+        }
 
+        $projectPath = $base;
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 
+        $cmd = $isWindows
+            ? "cd /d \"$projectPath\" && $composer install --no-interaction --prefer-dist 2>&1"
+            : "cd \"$projectPath\" && $composer install --no-interaction --prefer-dist 2>&1";
 
-// -------------------------------------------------------------
-// 3) CREATE .env FILE
-// -------------------------------------------------------------
-case "env":
+        $out = run_cmd($cmd);
 
-    if(!file_exists($dbConfig)){
         send([
-            "success" => false,
-            "output"  => "❌ DB configuration missing",
+            "success" => true,
+            "output"  => nl2br($out),
             "percent" => 40,
             "next"    => "db_config",
             "show_db_form" => true
         ]);
-    }
+        break;
 
-    $db = json_decode(file_get_contents($dbConfig), true);
+    // -------------------------------------------------------------
+    // 3) CREATE .env FILE
+    // -------------------------------------------------------------
+    case "env":
 
-    $env = file_exists($envExample)
-        ? file_get_contents($envExample)
-        : "";
+        if (!file_exists($dbConfig)) {
+            send([
+                "success" => false,
+                "output"  => "❌ DB configuration missing",
+                "percent" => 40,
+                "next"    => "db_config",
+                "show_db_form" => true
+            ]);
+        }
 
-    $env .= "\nDB_HOST={$db['host']}";
-    $env .= "\nDB_DATABASE={$db['name']}";
-    $env .= "\nDB_USERNAME={$db['user']}";
-    $env .= "\nDB_PASSWORD={$db['pass']}\n";
+        $db = json_decode(file_get_contents($dbConfig), true);
 
-    file_put_contents($envFile, $env);
+        $env = file_exists($envExample)
+            ? file_get_contents($envExample)
+            : "";
 
-    send([
-        "success" => true,
-        "output"  => "✔ .env created<br>",
-        "percent" => 50,
-        "next"    => "key"
-    ]);
-    break;   // <---- FIXED
+        $env .= "\nDB_HOST={$db['host']}";
+        $env .= "\nDB_DATABASE={$db['name']}";
+        $env .= "\nDB_USERNAME={$db['user']}";
+        $env .= "\nDB_PASSWORD={$db['pass']}\n";
 
+        file_put_contents($envFile, $env);
 
+        send([
+            "success" => true,
+            "output"  => "✔ .env created<br>",
+            "percent" => 50,
+            "next"    => "key"
+        ]);
+        break;
 
-// -------------------------------------------------------------
-// 4) GENERATE APP KEY
-// -------------------------------------------------------------
-case "key":
+    // -------------------------------------------------------------
+    // 4) GENERATE APP KEY
+    // -------------------------------------------------------------
+    case "key":
 
-    $out = run_cmd("cd $base && php artisan key:generate --force");
+        $out = run_cmd("cd $base && php artisan key:generate --force");
 
-    send([
-        "success" => true,
-        "output"  => nl2br($out),
-        "percent" => 60,
-        "next"    => "migrate"
-    ]);
-    break;   // <---- FIXED
+        send([
+            "success" => true,
+            "output"  => nl2br($out),
+            "percent" => 60,
+            "next"    => "migrate"
+        ]);
+        break;
 
+    // -------------------------------------------------------------
+    // 5) RUN MIGRATIONS
+    // -------------------------------------------------------------
+    case "migrate":
 
+        $out = run_cmd("cd $base && php artisan migrate --force");
 
-// -------------------------------------------------------------
-// 5) RUN MIGRATIONS
-// -------------------------------------------------------------
-case "migrate":
+        send([
+            "success" => true,
+            "output"  => nl2br($out),
+            "percent" => 75,
+            "next"    => "seed"
+        ]);
+        break;
 
-    $out = run_cmd("cd $base && php artisan migrate --force");
+    // -------------------------------------------------------------
+    // 6) SEED DATABASE
+    // -------------------------------------------------------------
+    case "seed":
 
-    send([
-        "success" => true,
-        "output"  => nl2br($out),
-        "percent" => 75,
-        "next"    => "seed"
-    ]);
-    break;   // <---- FIXED
+        $out = run_cmd("cd $base && php artisan db:seed --force");
 
+        send([
+            "success" => true,
+            "output"  => nl2br($out),
+            "percent" => 85,
+            "next"    => "permissions"
+        ]);
+        break;
 
+    // -------------------------------------------------------------
+    // 7) SET PERMISSIONS
+    // -------------------------------------------------------------
+    case "permissions":
 
-// -------------------------------------------------------------
-// 6) SEED DATABASE
-// -------------------------------------------------------------
-case "seed":
+        @chmod($base . "/storage", 0777);
+        @chmod($base . "/bootstrap/cache", 0777);
 
-    $out = run_cmd("cd $base && php artisan db:seed --force");
+        send([
+            "success" => true,
+            "output"  => "✔ Permissions fixed<br>",
+            "percent" => 95,
+            "next"    => "finish"
+        ]);
+        break;
 
-    send([
-        "success" => true,
-        "output"  => nl2br($out),
-        "percent" => 85,
-        "next"    => "permissions"
-    ]);
-    break;   // <---- FIXED
+    // -------------------------------------------------------------
+    // 8) FINISH
+    // -------------------------------------------------------------
+    case "finish":
 
+        file_put_contents($base . "/installed", "installed");
 
+        send([
+            "success" => true,
+            "output"  => "🎉 Installation complete!",
+            "percent" => 100,
+            "next"    => "finish"
+        ]);
+        break;
 
-// -------------------------------------------------------------
-// 7) SET PERMISSIONS
-// -------------------------------------------------------------
-case "permissions":
-
-    @chmod($base . "/storage", 0777);
-    @chmod($base . "/bootstrap/cache", 0777);
-
-    send([
-        "success" => true,
-        "output"  => "✔ Permissions fixed<br>",
-        "percent" => 95,
-        "next"    => "finish"
-    ]);
-    break;   // <---- FIXED
-
-
-
-// -------------------------------------------------------------
-// 8) FINISH
-// -------------------------------------------------------------
-case "finish":
-
-    file_put_contents($base . "/installed", "installed");
-
-    send([
-        "success" => true,
-        "output"  => "🎉 Installation complete!",
-        "percent" => 100,
-        "next"    => "finish"
-    ]);
-    break;   // <---- FIXED
-
-
-
-// -------------------------------------------------------------
-// Unknown step
-// -------------------------------------------------------------
-default:
-    send([
-        "success" => false,
-        "output"  => "Unknown step: $step",
-        "next"    => "check"
-    ]);
-    break;   // <---- FIXED
+    // -------------------------------------------------------------
+    // Unknown step
+    // -------------------------------------------------------------
+    default:
+        send([
+            "success" => false,
+            "output"  => "Unknown step: $step",
+            "next"    => "check"
+        ]);
+        break;
 }
