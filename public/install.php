@@ -2,7 +2,42 @@
 <html>
 
 <head>
-    <title>Installer</title>
+    <title>Academy</title>
+    <link rel="stylesheet" href="./assets/css/owl.carousel.css">
+    <link rel="stylesheet" href="./assets/css/flaticon.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/meanmenu.css">
+    <link rel="stylesheet" href="./assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./assets/css/video.min.css">
+    <link rel="stylesheet" href="./assets/css/lightbox.css">
+    <link rel="stylesheet" href="./assets/css/progess.css">
+    <link rel="stylesheet" href="./assets/css/animate.min.css">
+
+    <link rel="stylesheet" href="./css/frontend.css">
+    <link rel="stylesheet" href="./assets/css/fontawesome-all.css">
+
+    <link rel="stylesheet" href="./assets/css/responsive.css">
+
+    <link rel="stylesheet" href="./assets/css/colors/switch.css">
+    <link href="./assets/css/colors/color-2.css" rel="alternate stylesheet" type="text/css"
+        title="color-2">
+    <link href="./assets/css/colors/color-3.css" rel="alternate stylesheet" type="text/css"
+        title="color-3">
+    <link href="./assets/css/colors/color-4.css" rel="alternate stylesheet" type="text/css"
+        title="color-4">
+    <link href="./assets/css/colors/color-5.css" rel="alternate stylesheet" type="text/css"
+        title="color-5">
+    <link href="./assets/css/colors/color-6.css" rel="alternate stylesheet" type="text/css"
+        title="color-6">
+    <link href="./assets/css/colors/color-7.css" rel="alternate stylesheet" type="text/css"
+        title="color-7">
+    <link href="./assets/css/colors/color-8.css" rel="alternate stylesheet" type="text/css"
+        title="color-8">
+    <link href="./assets/css/colors/color-9.css" rel="alternate stylesheet" type="text/css"
+        title="color-9">
+
+
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
+
     <style>
         body {
             font-family: Arial;
@@ -42,10 +77,10 @@
         }
 
         .output {
-            background: #000;
+            background: #fff;
             color: #0f0;
             padding: 10px;
-            height: 300px;
+            height: 80px;
             overflow: auto;
             font-family: monospace;
         }
@@ -72,6 +107,86 @@
 </head>
 
 <body>
+
+    <nav class="navbar navbar-expand-lg navbar-light">
+
+        <div class="navbar-header float-left">
+            <a class="navbar-brand text-uppercase" href="#">
+                <img src="./assets/img/logo.png" alt="logo" class="logoimg">
+            </a>
+        </div>
+
+        <button class="navbar-toggler ham-top-space" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="nav-item px-3 dropdown">
+            <!-- <a class="nav-link dropdown-toggle nav-link" data-toggle="dropdown" href="#" role="button"
+                aria-haspopup="true" aria-expanded="false">
+                <span class="d-md-down-none">Language (EN)</span>
+            </a> -->
+
+            <!-- <div class="dropdown-menu dropdown-menu-right add-dropmenu-position" aria-labelledby="navbarDropdownLanguageLink">
+
+
+
+
+
+                <small><a href="http://44.251.231.158/lang/ar" class="dropdown-item">Arabic</a></small>
+            </div> -->
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <ul class="navbar-nav ul-li ml-auto sm-rl-space">
+
+                <!-- <li class="px-lg-4 hamburger-top-space sm-tb-space">
+                    <form action="/search" method="get" id="searchform">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text searchcourse" id="basic-addon1"><i
+                                        class="bi bi-search" onclick="submit()"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="q"
+                                placeholder="Search for course" aria-label="Username" required
+                                aria-describedby="basic-addon1">
+                        </div>
+                    </form>
+                </li> -->
+
+
+                <li class="sm-tb-space">
+                    <div class="log-in">
+                        <a id="openLoginModal" data-target="#myModal" href="#">Installation</a>
+
+
+                    </div>
+                </li>
+                <!-- <li class="sm-tb-space">
+                    <div class="log-in">
+                        <a id="openRegisterModal" data-target="#myRegisterModal"
+                            href="#">SignUp</a>
+
+
+                    </div>
+                </li> -->
+                <li class="sm-tb-space">
+                    <div class="cart-search float-lg-right ul-li">
+                        <ul class="lock-icon">
+                            <li>
+                                <a href="#"><i class="fas fa-shopping-bag"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+
+            </ul>
+
+        </div>
+    </nav>
     <div class="container">
         <h2>Installer</h2>
 
