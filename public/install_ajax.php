@@ -81,10 +81,13 @@ try {
             $allGood = true;
 
             // PHP version
-            if (version_compare(PHP_VERSION, '8.0', '>=')) {
+            if (
+                version_compare(PHP_VERSION, '8.2.0', '>=')
+                && version_compare(PHP_VERSION, '8.3.0', '<')
+            ) {
                 $msg .= "✔ PHP " . PHP_VERSION . " OK<br>";
             } else {
-                $msg .= "❌ PHP 8.0+ required, current: " . PHP_VERSION . "<br>";
+                $msg .= "❌ PHP 8.2.x required, current: " . PHP_VERSION . "<br>";
                 $allGood = false;
             }
 
@@ -92,18 +95,39 @@ try {
             $required = ['pdo', 'pdo_mysql', 'openssl', 'mbstring', 'tokenizer', 'xml', 'ctype', 'json', 'bcmath', 'fileinfo', 'curl', 'gd', 'zip'];
             foreach ($required as $ext) {
                 if (extension_loaded($ext)) {
-                    $msg .= "✔ $ext enabled<br>";
+                    //$msg .= "✔ $ext enabled<br>";
                 } else {
                     $msg .= "❌ Missing extension: $ext<br>";
                     $allGood = false;
                 }
             }
 
+            // Composer version (EXACT 2.7.8)
+            $composerOutput = shell_exec('composer --version 2>&1');
+
+            if ($composerOutput && preg_match('/version\s+([0-9\.]+)/i', $composerOutput, $m)) {
+                $composerVersion = $m[1];
+
+                if ($composerVersion === '2.7.8') {
+                    $msg .= "✔ Composer $composerVersion OK<br>";
+                } else {
+                    $msg .= "❌ Composer EXACT 2.7.8 required, current: $composerVersion<br>";
+                    $allGood = false;
+                }
+            } else {
+                $msg .= "❌ Composer not found<br>";
+                $allGood = false;
+            }
+
             if ($allGood) {
                 $next = nextStep($step);
                 echo json_encode(['message' => $msg . '✔ All requirements OK', 'show_db_form' => false, 'next' => $next]);
             } else {
-                echo json_encode(['message' => $msg . '❌ Fix errors and refresh', 'show_db_form' => false]);
+                echo json_encode([
+                    'success' => false,
+                    'message' => $msg . "<br><strong>❌ Fix errors and refresh page</strong>"
+                ]);
+                exit;
             }
             exit;
 

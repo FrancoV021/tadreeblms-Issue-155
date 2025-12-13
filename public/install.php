@@ -41,7 +41,7 @@
     <style>
         body {
             font-family: Arial;
-            
+
             padding: 20px;
 
             background-color: #d0dbb9;
@@ -112,7 +112,7 @@
         .dropdown-toggle::after {
             display: none !important;
 
-    }
+        }
     </style>
 </head>
 
@@ -245,27 +245,33 @@
             fetch("install_ajax.php?step=" + step, fetchOptions)
                 .then(res => res.json())
                 .then(res => {
-                    appendLog(res.message || JSON.stringify(res));
+                    appendLog(res.message || '');
 
-                    // Update progress bar
+                    // 🚨 HARD STOP
+                    if (res.success === false) {
+                        appendLog("❌ Installation stopped");
+                        return;
+                    }
+
+                    // Update progress
                     currentIndex = steps.indexOf(step);
                     let percent = Math.round((currentIndex + 1) / steps.length * 100);
                     updateBar(percent);
 
-                    // Show DB form if backend says so
+                    // Show DB form if needed
                     if (res.show_db_form) {
                         document.getElementById("dbform").classList.remove("hidden");
-                        return; // wait for user input
+                        return;
                     } else {
                         document.getElementById("dbform").classList.add("hidden");
                     }
 
-                    // Next step
-                    if (step !== "finish") {
-                        let nextStep = res.next || steps[currentIndex + 1];
-                        setTimeout(() => runStep(nextStep), 500);
+                    // Continue ONLY if success
+                    if (step !== "finish" && res.next) {
+                        setTimeout(() => runStep(res.next), 500);
                     }
                 })
+
                 .catch(err => {
                     appendLog("❌ AJAX error: " + err);
                 });
