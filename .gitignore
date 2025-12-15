@@ -1,0 +1,77 @@
+# --------------------------
+# Laravel & PHP
+# --------------------------
+
+/vendor/
+/node_modules/
+
+.composer/
+
+.env
+.env.*
+!.env.example
+
+.phpunit.result.cache
+composer.lock
+
+# Ignore all storage except public assets
+storage/*
+!storage/app/
+!storage/app/public/
+!storage/framework/
+!storage/framework/cache/
+!storage/framework/sessions/
+!storage/framework/views/
+!storage/logs/
+storage/logs/*.log
+
+# Ignore Laravel debugbar cache
+/storage/debugbar
+
+# Composer cache (PREVENT 100MB FILES)
+.composer/
+
+# --------------------------
+# IDE / Editor Files
+# --------------------------
+
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+.history/
+*.code-workspace
+
+# --------------------------
+# OS Files
+# --------------------------
+
+.DS_Store
+Thumbs.db
+
+# --------------------------
+# Node / Build
+# --------------------------
+
+npm-debug.log
+yarn-error.log
+/public/hot
+/public/storage
+/public/js/*.map
+
+# --------------------------
+# Misc
+# --------------------------
+
+*.zip
+*.rar
+*.tar
+*.bak
+*.tmp
+
+DB/
+Server.txt
+url_links.txt

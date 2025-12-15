@@ -1,0 +1,293 @@
+@inject('request', 'Illuminate\Http\Request')
+@extends('backend.layouts.app')
+@section('title', __('labels.backend.tests.title').' | '.app_name())
+@push('after-styles')
+<style>
+     
+.select2-container--default .select2-selection--single {
+        border: 1px solid #ccc !important;
+        border-radius: 5px !important;
+        /* padding: 4px; */
+    }
+    .select2-container .select2-selection--single {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    height: 34px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #444;
+    line-height: 30px;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 26px;
+    position: absolute;
+    top: 4px;
+    right: 1px;
+    width: 20px;
+}
+.dropdown-item{
+    border-bottom: none;
+}
+
+span.small {
+    display: block;
+}
+    
+    </style>
+
+@endpush
+
+@section('content')
+
+
+<div class="pb-3 d-flex justify-content-between align-items-center">
+   <h4>
+       @lang('labels.backend.tests.title')
+   </h4>
+   @can('test_create')
+       <div>
+            @if(request()->course_id)
+           <a href="{{ route('admin.tests.create', ['course_id' => request()->course_id, 'test' => true]) }}"
+              class="btn add-btn">@lang('strings.backend.general.app_add_new')</a>
+            {{-- <span class="small">Please select a course first</span> --}}
+            @else
+            <a @disabled(true) href="javascript:void(0);"
+              class="btn add-btn">@lang('strings.backend.general.app_add_new')</a>
+            <span class="small">Please select a course first</span>
+            @endif
+       </div>
+   @endcan
+ 
+</div>
+    <div class="card">
+        
+        <!-- <div class="card-header">
+            <h3 class="page-title d-inline">@lang('labels.backend.tests.title')</h3>
+            @can('test_create')
+                <div class="float-right">
+                    <a href="{{ route('admin.tests.create', ['course_id' => request()->course_id]) }}"
+                       class="btn btn-success">@lang('strings.backend.general.app_add_new')</a>
+
+                </div>
+            @endcan
+        </div> -->
+        <div class="card-body ">
+            <div class="row mb-3">
+                <div class="col-12 col-lg-6 form-group">
+                <label for="course_id" class="control-label">
+                    {{ trans('labels.backend.lessons.fields.course') }}
+                </label>
+                <div class=" custom-select-wrapper">
+                    <select name="course_id" id="course_id" class="form-control custom-select-box select2" required>
+                        <option value="">Select Course</option>
+                        @foreach($courses as $id => $course)
+                        <option value="{{ $id }}"
+                            @if(request('course_id')==$id || old('course_id')==$id) selected @endif>
+                            {{ $course }}
+                        </option>
+                        @endforeach
+                    </select>
+                    <span class="custom-select-icon">
+                        <i class="fa fa-chevron-down"></i>
+                    </span>
+                </div>
+            </div>
+            </div>
+            <div class="d-block">
+                <ul class="list-inline">
+                    <li class="list-inline-item">
+                        <a href="{{ route('admin.tests.index',['course_id'=>request('course_id')]) }}"
+                           style="{{ request('show_deleted') == 1 ? '' : 'font-weight: 700' }}">{{trans('labels.general.all')}}</a>
+                    </li>
+                    |
+                    <li class="list-inline-item">
+                        <a href="{{trashUrl(request())}}" style="{{request('show_deleted') == 1 ? 'font-weight: 700' : ''}}">{{trans('labels.general.trash')}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="table-responsive">
+
+                @if(request('course_id') != "" || request('show_deleted') == 1)
+    
+    
+                <table id="myTable"
+                       class="table dt-select custom-teacher-table table-striped @can('test_delete') @if ( request('show_deleted') != 1 ) dt-select @endif @endcan">
+                    <thead>
+                    <tr>
+                        @can('test_delete')
+                            @if ( request('show_deleted') != 1 )
+                                <th style="text-align:center;"><input type="checkbox" class="mass" id="select-all"/>
+                                </th>@endif
+                        @endcan
+                        <th>@lang('labels.general.sr_no')</th>
+                        <th>@lang('labels.general.id')</th>
+                        <th>@lang('labels.backend.tests.fields.course')</th>
+                        <th>@lang('labels.backend.tests.fields.title')</th>
+                        <th>@lang('labels.backend.tests.fields.questions')</th>
+                        <th>@lang('labels.backend.tests.fields.published')</th>
+                        @if( request('show_deleted') == 1 )
+                            <th style="text-align:center;">@lang('labels.general.actions')</th>
+    
+                        @else
+                            <th style="text-align:center;">@lang('labels.general.actions')</th>
+                        @endif
+                    </tr>
+                    </thead>
+    
+                    <tbody>
+    
+                    </tbody>
+                </table>
+            </div>
+
+            @endif
+        </div>
+    </div>
+@stop
+
+@push('after-scripts')
+    <script>
+
+        $(document).ready(function () {
+            var route = '{{route('admin.tests.get_data')}}';
+
+
+            @php
+                $show_deleted = (request('show_deleted') == 1) ? 1 : 0;
+                $course_id = (request('course_id') != "") ? request('course_id') : 0;
+            $route = route('admin.tests.get_data',['show_deleted' => $show_deleted,'course_id' => $course_id]);
+            @endphp
+
+            route = '{{$route}}';
+            route = route.replace(/&amp;/g, '&');
+
+            @if(request('show_deleted') == 1 ||  request('course_id') != "")
+
+            $('#myTable').DataTable({
+                processing: true,
+                serverSide: true,
+                iDisplayLength: 10,
+                retrieve: true,
+                dom: "<'table-controls'lfB>" +
+                     "<'table-responsive't>" +
+                     "<'d-flex justify-content-end align-items-center mt-3'p><'actions'>",
+                // buttons: [
+                //     {
+                //         extend: 'csv',
+                //         exportOptions: {
+                //             columns: [ 1, 2, 3, 4,5,6]
+                //         }
+                //     },
+                //     {
+                //         extend: 'pdf',
+                //         exportOptions: {
+                //             columns: [ 1, 2, 3, 4,5,6]
+                //         }
+                //     },
+                //     'colvis'
+                // ],
+                                  buttons: [
+    {
+        extend: 'collection',
+        text: '<i class="fa fa-download icon-styles"></i>',
+        className: '',
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'CSV',
+                exportOptions: {
+                    columns: [1, 2, 3, 4, 5]
+                }
+            },
+            {
+                extend: 'pdf',
+                text: 'PDF',
+                exportOptions: {
+                    columns: [1, 2, 3, 4, 5]
+                }
+            }
+        ]
+    },
+      {extend: 'colvis',
+    text: '<i class="fa fa-eye icon-styles" aria-hidden="true"></i>',
+    className: ''},
+],
+                ajax: route,
+                columns: [
+                        @if(request('show_deleted') != 1)
+                    {
+                        "data": function (data) {
+                            return '<input type="checkbox" class="single" name="id[]" value="' + data.id + '" />';
+                        }, "orderable": false, "searchable": false, "name": "id"
+                    },
+                        @endif
+                    {data: "DT_RowIndex", name: 'DT_RowIndex', searchable: false, orderable: false},
+                    {data: "id", name: 'id'},
+                    {data: "course", name: 'course'},
+                    {data: "title", name: 'title'},
+                    {data: "questions", name: "questions"},
+                    {data: "published", name: "published"},
+                    {data: "actions", name: "actions"}
+                ],
+                @if(request('show_deleted') != 1)
+                columnDefs: [
+                    {"width": "5%", "targets": 0},
+                    {"className": "text-center", "targets": [0]}
+                ],
+                @endif
+                initComplete: function () {
+                    let $searchInput = $('#myTable_filter input[type="search"]');
+    $searchInput
+        .addClass('custom-search')
+        .wrap('<div class="search-wrapper position-relative d-inline-block"></div>')
+        .after('<i class="fa fa-search search-icon"></i>');
+
+    $('#myTable_length select').addClass('form-select form-select-sm custom-entries');
+                },
+               
+
+
+                createdRow: function (row, data, dataIndex) {
+                    $(row).attr('data-entry-id', data.id);
+                },
+                language:{
+                    url : "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/{{$locale_full_name}}.json",
+                    buttons :{
+                        colvis : '{{trans("datatable.colvis")}}',
+                        pdf : '{{trans("datatable.pdf")}}',
+                        csv : '{{trans("datatable.csv")}}',
+                    },  
+                    search:"",          
+                },
+     
+            });
+
+            @endif
+
+
+
+            $(document).on('change', '#course_id', function (e) {
+                var course_id = $(this).val();
+                window.location.href = "{{route('admin.tests.index')}}" + "?course_id=" + course_id
+            });
+            @can('test_delete')
+            @if(request('show_deleted') != 1)
+            $('.actions').html('<a href="' + '{{ route('admin.tests.mass_destroy') }}' + '" class="btn btn-xs btn-danger js-delete-selected" style="margin-top:0.755em;margin-left: 20px;">Delete selected</a>');
+            @endif
+            @endcan
+
+            $(".js-example-placeholder-single").select2({
+                placeholder: "{{trans('labels.backend.lessons.select_course')}}",
+            });
+
+        });
+
+        //add delete option
+
+
+    </script>
+
+@endpush
