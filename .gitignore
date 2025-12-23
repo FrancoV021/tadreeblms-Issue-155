@@ -29,6 +29,10 @@ storage/logs/*.log
 # Ignore Laravel debugbar cache
 /storage/debugbar
 
+/storage/framework/sessions/*
+
+installed
+
 # Composer cache (PREVENT 100MB FILES)
 .composer/
 
@@ -76,3 +80,5 @@ yarn-error.log
 DB/
 Server.txt
 url_links.txt
+
+README.md
