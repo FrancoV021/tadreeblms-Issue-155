@@ -6,8 +6,8 @@
 /node_modules/
 
 .composer/
-installed
-readme.md
+/installed
+README.md
 .env
 .env.*
 !.env.example
@@ -30,6 +30,8 @@ storage/logs/*.log
 /storage/debugbar
 
 /storage/framework/sessions/*
+
+/installed
 
 # Composer cache (PREVENT 100MB FILES)
 .composer/
@@ -78,3 +80,5 @@ yarn-error.log
 DB/
 Server.txt
 url_links.txt
+
+README.md
