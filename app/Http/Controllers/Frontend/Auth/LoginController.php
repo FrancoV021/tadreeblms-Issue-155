@@ -149,32 +149,13 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
-        
-        if (!$user->isConfirmed()) {
-
         // Confirmation & active checks
         if (! $user->isConfirmed()) {
             auth()->logout();
             throw new GeneralException(__('exceptions.frontend.auth.confirmation.pending'));
         }
 
-
-            if ($user->isPending()) {
-                throw new GeneralException(__('exceptions.frontend.auth.confirmation.pending'));
-            }
-
-            throw new GeneralException(
-                __('exceptions.frontend.auth.confirmation.resend', [
-                    'url' => route(
-                        'frontend.auth.account.confirm.resend',
-                        $user->{$user->getUuidName()}
-                    )
-                ])
-            );
-        } elseif (!$user->isActive()) {
-
         if (! $user->isActive()) {
-
             auth()->logout();
             throw new GeneralException(__('exceptions.frontend.auth.deactivated'));
         }
