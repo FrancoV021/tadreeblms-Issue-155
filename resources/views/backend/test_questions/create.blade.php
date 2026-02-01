@@ -191,6 +191,79 @@
             <input type="hidden" id="action_btn" name="action_btn" value="">
             <input type="hidden" id="course_id" name="course_id" value="{{ $course_id }}">
 
+<div class="pb-3 d-flex justify-content-between align-items-center addcourseheader">
+       <h4>
+           @lang('labels.backend.questions.create')
+       </h4>
+         <div class="">
+       <a href="{{ route('admin.test_questions.index') }}" class="btn btn-primary">@lang('labels.backend.questions.view')</a>
+   </div>
+     
+   </div>
+<div class="card">
+    <!-- <div class="card-header">
+        <h3 class="page-title float-left mb-0">@lang('labels.backend.questions.create')</h3>
+        <div class="float-right">
+            <a href="{{ route('admin.test_questions.index') }}" class="btn btn-success">@lang('labels.backend.questions.view')</a>
+        </div>
+    </div> -->
+    <div class="card-body">
+        <input type="hidden" id="temp_id" name="temp_id" value="{{ $temp_id }}">
+        <input type="hidden" id="action_btn" name="action_btn" value="">
+        <input type="hidden" id="course_id" name="course_id" value="{{ $course_id }}">
+        <div class="row mt-3">
+            <div class="col-12 col-md-6">
+                <label>Test</label>
+                <div class="custom-select-wrapper">
+
+                    <select @if($auto_test_id) disabled @endif class="form-control custom-select-box" name="test_id" id="test_id" required>
+                        <option value="">Select Test</option>
+                        @foreach($tests as $key=> $value)
+                        <option @if((request()->get('test_id') == $value->id) || ($auto_test_id == $value->id)) selected @endif value="{{$value->id}}">{{$value->title}}</option>
+                        @endforeach
+                    </select>
+                     <span class="custom-select-icon">
+        <i class="fa fa-chevron-down"></i>
+    </span>
+                </div>
+            </div>
+         
+            <div class="col-12 col-md-6">
+                <label>Question Type</label>
+                <div class="custom-select-wrapper">
+
+                    <select class="form-control custom-select-box" name="question_type" id="question_type">
+                        <option value="1"> Single Choice </option>
+                        {{-- <option value="2"> Multiple Choice </option>
+                        <option value="3"> Short Answer </option> --}}
+                    </select>
+                     <span class="custom-select-icon">
+        <i class="fa fa-chevron-down"></i>
+    </span>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+          <div class="col-12 col-md-6 mt-3 notextarea"> 
+                <label>Question</label>
+                <textarea class="form-control editor" rows="3" name="question" id="question" required="required"></textarea>
+            </div>
+         
+                <div class="col-12 col-md-6"> 
+                     <div class="mt-3 notextarea">
+                    <label>Option</label>
+                    <textarea class="form-control editor" rows="3" name="option" id="option" required="required"></textarea>
+                    <div class="addoptbtn">
+                    <button type="button" id="add_option" class="btn btn-primary mt-2">Add Option</button>
+                    </div>
+                    <div class="addoptiontable mt-1">
+                    <div id="option-area" class="pt-1"></div>
+    </div>
+                </div>
+              
             <!-- Metadata Card -->
             <div class="card">
                 <div class="card-header">
@@ -261,7 +334,23 @@
                         <textarea class="form-control" rows="2" name="hint" id="hint" placeholder="Provide a hint for learners..."></textarea>
                     </div>
                 </div>
+               
             </div>
+            <div class="cb_question_setup">
+            <div class="row">
+                 <div class="col-12 col-md-5 notextarea">
+                    <label>Solution</label>
+                    <textarea class="form-control textarea-col editor" rows="3" name="solution" id="solution"></textarea>
+                </div>
+             
+             <div class="col-12 col-md-2">
+                    <label>Marks</label>
+                    <input type="number" class="form-control" name="marks" id="marks" placeholder="Enter Marks" required />
+                </div>
+             
+                <div class="col-12 col-md-5 notextarea">
+                    <label>Comment</label>
+                    <textarea class="form-control textarea-col editor" rows="3" name="comment" id="comment"></textarea>
 
             <!-- Options Builder Card -->
             <div class="card" id="options-card">
@@ -340,7 +429,31 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
+     <div class="btmbtns">
+        <div class="row">
+    <div class="col-12 mt-5 buttons">
+     {!! Form::button('Save & Add More', ['class' => 'frm_submit add-btn', 'id'=>'save_and_add_more', 'value'=>'save_and_add_more']) !!}
+     <div class="text-right">
+        <button
+            type="button"
+            class="frm_submit cancel-btn"
+            id="save_as_draft"
+            value="Save As Draft">
+            Save As Draft
+        </button>
+
+        <button
+            type="button"
+            class="frm_submit add-btn"
+            id="save"
+            value="Next">
+            Next
+        </button>
+    </div>
+    </div></div>
+     </div>
 </div>
 
 <!-- Sticky Footer -->
