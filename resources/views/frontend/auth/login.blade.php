@@ -45,7 +45,12 @@
 
     .breadcrumb-section {
         background-color: #c1902d4a;
-        padding: 75px 0;
+        padding: 30px 0; 
+    }
+    .login-wraper {
+        min-height:calc(100vh - 120px);
+        dislpay: flex;
+        align-items: center;
     }
 
     .demo-credentials {
@@ -78,15 +83,16 @@
         </div>
     </div>
 </section>
-<div class="row justify-content-center align-items-center">
-    <div class="col col-sm-5 align-self-center">
+<div class="login-wraper">
+  <div class="row justify-content-center w-100">
+        <div class="col col-sm-5 align-self-center">
         <div class="card">
-
+            
             <div class="card-header">
                 <h2>My Account</h2>
                 <p>Login to continue</p>
             </div>
-
+            
             <div class="card-body">
                 <div class="error-block">
                     <span id="error-msg" class="error-response text-danger"></span>
@@ -94,7 +100,7 @@
                 </div>
                 <form method="POST" id="loginPageForm" action="{{ route('frontend.auth.login.post') }}">
                     @csrf
-
+                    
                     <div class="form-group">
                         
                         <input type="email"
@@ -104,56 +110,55 @@
                                placeholder="{{ __('validation.attributes.frontend.email') }}"
                                maxlength="191"
                                required>
-                    </div>
-
-                    
-                    <div class="form-group">
-                        
-                        <input type="password"
-                               name="password"
-                               id="password"
+                            </div>
+                            
+                            
+                            <div class="form-group">
+                                
+                                <input type="password"
+                                name="password"
+                                id="password"
                                class="form-control"
                                placeholder="{{ __('validation.attributes.frontend.password') }}"
                                required>
-                    </div>
+                            </div>
 
-                    
+                            
                     <div class="form-group">
                         <div class="form-check">
                             <input type="checkbox"
-                                   class="form-check-input"
+                            class="form-check-input"
                                    name="remember"
                                    id="remember"
                                    value="1"
                                    checked>
-                            <label class="form-check-label" for="remember">
+                                   <label class="form-check-label" for="remember">
                                 @lang('labels.frontend.auth.remember_me')
                             </label>
                         </div>
                     </div>
 
                     {{-- Captcha --}}
-                    <div class="form-group">
-                        <div class="d-flex align-items-center">
-                            <span class="font-weight-bold mr-2">
-                                Captcha: {{ $captha }}
-                            </span>
-
-                            <input type="text"
-                                name="captcha"
-                                class="form-control"
-                                style="width:120px"
-                                required>
-                        </div>
-                    </div>
-
-                    {{-- Submit --}}
-                    <div class="form-group nws-button">
-                        <button type="submit" id="loginBtn" class="text-center white text-capitalize">
+                    <div class="form-group d-flex align-items-center justify-content-between">
+                        
+                        <label class="mb- font-weight-bold">
+                            captcha: {{ $captcha }}
+                        </label>
+                        <input 
+                        type="text"
+                        name="captcha"
+                        class="form-control ml-2"
+                        style="max-width:120px"
+                        required
+                        >
+                        
+                        {{-- Submit --}}
+                        <div class="form-group nws-button">
+                            <button type="submit" id="loginBtn" class="text-center white text-capitalize">
                             @lang('labels.frontend.auth.login_button')
                         </button>
                     </div>
-
+                    
                     {{-- Forgot password --}}
                     <div class="form-group text-right">
                         <a href="{{ route('frontend.auth.password.reset') }}">
@@ -161,7 +166,7 @@
                         </a>
                     </div>
                 </form>
-
+                
                 {{-- Social login --}}
                 @if(!empty($socialiteLinks))
                     <div class="text-center mt-3">
@@ -179,6 +184,7 @@
             
         </div>
     </div>
+  </div>
 </div>
 {{-- KEEP SCRIPT INSIDE THE SECTION --}}
 @push('after-scripts')
